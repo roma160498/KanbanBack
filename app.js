@@ -20,7 +20,10 @@ let sqlOptions = {
 }
 let connection = mysql.createConnection(sqlOptions);
 let sessionStore = new MySqlStore(sqlOptions);
+let routes = require('./api/routes/userRoutes');
+
 app = express();
+
 app.listen(3000, function () {
     console.log("ajntgtrg");
 })
@@ -120,6 +123,44 @@ function getUsers(callback, properties, amount, offset, isCount) {
         return callback(results);
     });
 }
+function getFeatures(callback, properties, amount, offset, isCount) {
+    let propString = `f.id, f.name, f.description, f.acc_criteria, f.modified_on, f.created_on, f.closed_on,
+    f.creater_id, concat(u.name, ' ', u.surname) as creator_name,
+    f.type_id, fc.name as type_name,
+    f.team_id, t.name as team_name,
+    f.product_id, p.name as product_name`;
+    propString = isCount ? `COUNT(${'*'}) as sum` : propString;
+    let amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
+    let offsetParam = offset !== 'undefined' ? 'offset ' + offset : '';
+    const query = `SELECT ${propString} from feature as f inner join user as u
+    on u.id = f.creater_id
+    inner join featureclassification as fc
+    on fc.id = f.type_id
+    inner join team as t
+    on t.id = f.team_id
+    inner join product as p
+    on p.id = f.product_id ${amountParam} ${offsetParam}`
+    connection.query(query, function (error, results, fields) {
+        if (error) {
+            return error;
+        }
+        return callback(results);
+    });
+}
+function getProducts(callback, properties, amount, offset, isCount) {
+    let propString = properties ? properties.join(',') : '*';
+    propString = isCount ? `COUNT(${propString}) as sum` : propString;
+    let amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
+    let offsetParam = offset !== 'undefined' ? 'offset ' + offset : '';
+    //console.log(`SELECT ${propString} from user ${amountParam} ${offsetParam}`)
+    connection.query(`SELECT ${propString} from product ${amountParam} ${offsetParam}`, function (error, results, fields) {
+        //console.log(results)
+        if (error) {
+            return error;
+        }
+        return callback(results);
+    });
+}
 function getUsersOfTeam(callback, teamId, properties, amount, offset, isCount) {
     let propString = properties ? properties.join(',') : '*';
     propString = isCount ? `COUNT(${propString}) as sum` : propString;
@@ -189,6 +230,23 @@ function deleteTeam(callback, id) {
         return callback(results);
     });
 }
+function deleteProduct(callback, id) {
+    connection.query(`DELETE from product where id="${id}"`, function (error, results, fields) {
+        if (error) {
+            return error;
+        }
+        return callback(results);
+    });
+}
+function insertProduct(callback, product) {
+    connection.query(`INSERT INTO product (name, description) Values ("${product['name']}", "${product['description']}")`, function (error, results, fields) {
+        //console.log(error)
+        if (error) {
+            return callback(null, error);
+        }
+        return callback(results);
+    });
+}
 function insertTeam(callback, team) {
     connection.query(`INSERT INTO team (name) Values ("${team['name']}")`, function (error, results, fields) {
         //console.log(error)
@@ -215,6 +273,19 @@ function updateTeam(callback, id, team) {
     }
     statementsString = statementsString.slice(0, -1)
     connection.query(`UPDATE team SET ${statementsString} where id='${id}'`, function (error, results, fields) {
+        if (error) {
+            return callback(null, error);
+        }
+        return callback(results);
+    });
+}
+function updateProduct(callback, id, product) {
+    let statementsString = '';
+    for (let key of Object.keys(product)) {
+        statementsString += `${key}='${product[key]}',`
+    }
+    statementsString = statementsString.slice(0, -1)
+    connection.query(`UPDATE product SET ${statementsString} where id='${id}'`, function (error, results, fields) {
         if (error) {
             return callback(null, error);
         }
@@ -309,6 +380,11 @@ app.delete('/team/:teamId', function (req, res) {
         res.send({ status: 200 });
     }, req.params.teamId);
 })
+app.delete('/products/:productId', function (req, res) {
+    deleteProduct(function (results) {
+        res.send({ status: 200 });
+    }, req.params.productId);
+})
 app.post('/team', function (req, res) {
     insertTeam(function (results, error) {
         if (results) {
@@ -318,6 +394,16 @@ app.post('/team', function (req, res) {
         }
     }, req.body.team);
 })
+app.post('/products', function (req, res) {
+    insertProduct(function (results, error) {
+        if (results) {
+            res.send({ status: 200 });
+        } else {
+            res.send({ status: 400 });
+        }
+    }, req.body.product);
+})
+
 app.post('/teams/:teamId/users', function (req, res) {
     insertUsersOfTeam(function (results, error) {
         if (results) {
@@ -346,6 +432,15 @@ app.put('/team/:teamId', function (req, res) {
         }
     }, req.params.teamId, req.body.team);
 })
+app.put('/products/:productId', function (req, res) {
+    updateProduct(function (results, error) {
+        if (results) {
+            res.send({ status: 201 });
+        } else {
+            res.send({ status: 401 });
+        }
+    }, req.params.productId, req.body.product);
+})
 app.get('/roles', function (req, res) {
     let allRoles;
     const params = req.query;
@@ -353,6 +448,13 @@ app.get('/roles', function (req, res) {
         allRoles = result;
         res.json(allRoles);
     }, null, params.amount, params.offset, params.isCount, params.name);
+})
+app.get('/products', function (req, res) {
+    const params = req.query;
+    getProducts(function (result) {
+        let allProducts = result;
+        res.json(allProducts);
+    }, null, params.amount, params.offset, params.isCount);
 })
 app.get('/user', function (req, res) {
     let allUsers;
@@ -388,7 +490,13 @@ app.put('/user/:userId', function (req, res) {
         }
     }, req.params.userId, req.body.user);
 })
-
+app.get('/features', function (req, res) {
+    const params = req.query;
+    getFeatures(function (result) {
+        const allFeatures = result;
+        res.json(allFeatures);
+    }, null, params.amount, params.offset, params.isCount);
+})
 function authenticationMiddleware() {
     return function (req, res, next) {
         //console.log(`req.session.passport.user: ${JSON.stringify(req.session.passport)}`);
