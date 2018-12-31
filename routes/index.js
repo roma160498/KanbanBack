@@ -10,6 +10,7 @@ module.exports = (connection) => {
     router.use('/roles', require('./role')(connection));
     router.use('/products', require('./product')(connection));
     router.use('/features', require('./feature')(connection));
+    router.use('/featureclassifications', require('./featureclassification')(connection));
 
     // Authentication operation
     //router.use(require('./authentication')(connection));
