@@ -10,6 +10,29 @@ module.exports = (connection) => {
             res.json(result);
         }, null, params.amount, params.offset, params.isCount);
     });
+    router.post('/', function (req, res) {
+        methods.insertFeature(function (results, error) {
+            if (results) {
+                res.send({ status: 200 });
+            } else {
+                res.send({ status: 400 });
+            }
+        }, req.body.feature);
+    });
+    router.put('/:featureId', function (req, res) {
+        methods.updateFeature(function (results, error) {
+            if (results) {
+                res.send({ status: 201 });
+            } else {
+                res.send({ status: 401 });
+            }
+        }, req.params.featureId, req.body.feature);
+    });
+    router.delete('/:featureId', function (req, res) {
+        methods.deleteFeature(function (results) {
+            res.send({ status: 200 });
+        }, req.params.featureId);
+    });
 
     return router;
 };

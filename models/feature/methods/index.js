@@ -22,8 +22,43 @@ module.exports = (connection) => {
             }
             return callback(results);
         });
-    }
+    };
+    const insertFeature = (callback, feature) => {
+        connection.query(`INSERT INTO feature (name, type_id, creater_id, team_id, description, acc_criteria, product_id, status_id)
+         Values ("${feature['name']}", ${feature['type_id']}, ${feature['creater_id']}, ${feature['team_id']}, "${feature['description']}", "${feature['acc_criteria']}", ${feature['product_id']}, ${feature['status_id']})`, function (error, results, fields) {
+
+                console.log(error)
+            if (error) {
+                return callback(null, error);
+            }
+            return callback(results);
+        });
+    };
+    const updateFeature = (callback, id, feature) => {
+        let statementsString = '';
+        for (let key of Object.keys(feature)) {
+            statementsString += `${key}='${feature[key]}',`;
+        }
+        statementsString = statementsString.slice(0, -1);
+        connection.query(`UPDATE feature SET ${statementsString} where id='${id}'`, function (error, results, fields) {
+            if (error) {
+                return callback(null, error);
+            }
+            return callback(results);
+        });
+    };
+    const deleteFeature = (callback, id) => {
+        connection.query(`DELETE from feature where id="${id}"`, function (error, results, fields) {
+            if (error) {
+                return error;
+            }
+            return callback(results);
+        });
+    };
     return {
-        getFeatures
+        getFeatures,
+        insertFeature,
+        updateFeature,
+        deleteFeature
     };
 }
