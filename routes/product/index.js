@@ -33,5 +33,18 @@ module.exports = (connection) => {
             res.json(result);
         }, null, params.amount, params.offset, params.isCount);
     });
+
+    router.get('/:productId/features', function (req, res) {
+        const params = req.query;
+        methods.getFeaturesOfProduct(function (result) {
+            res.json(result);
+        }, req.params.productId, null, params.amount, params.offset, params.isCount);
+    });
+    router.get('/:productId/increments', function (req, res) {
+        const params = req.query;
+        methods.getIncrementsOfProduct(function (result) {
+            res.json(result);
+        }, req.params.productId, null, params.amount, params.offset, params.isCount);
+    });
     return router;
 };
