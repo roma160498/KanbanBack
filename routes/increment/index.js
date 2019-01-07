@@ -33,5 +33,18 @@ module.exports = (connection) => {
             res.json(result);
         }, null, params.amount, params.offset, params.isCount);
     });
+    router.get('/:incrementId', function (req, res) {
+        const params = req.query;
+        methods.getIncrementById(req.params.incrementId, function (result) {
+            res.json(result);
+        }, null, params.amount, params.offset, params.isCount);
+    });
+    router.get('/:incrementId/iterations', function (req, res) {
+        console.log(123)
+        const params = req.query;
+        methods.getIterationsOfIncrement(function (result) {
+            res.json(result);
+        }, req.params.incrementId, null, params.amount, params.offset, params.isCount);
+    });
     return router;
 };
