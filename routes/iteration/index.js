@@ -33,5 +33,12 @@ module.exports = (connection) => {
             res.json(result);
         }, null, params.amount, params.offset, params.isCount);
     });
+
+    router.get('/:iterationId/issues', function (req, res) {
+        const params = req.query;
+        methods.getIssuesOfIteration(req.params.iterationId, function (result) {
+            res.json(result);
+        },  null, params.amount, params.offset, params.isCount);
+    });
     return router;
 };

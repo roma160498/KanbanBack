@@ -45,10 +45,43 @@ module.exports = (connection) => {
             return callback(results);
         });
     };
+
+    getIssuesOfIteration = (iterationId, callback, properties, amount, offset, isCount) => {
+        let propString =  `i.id, i.status_id, i.feature_id, i.iteration_id, i.classification_id, i.team_id,
+        i.user_id, i.story_points, i.completeness, i.name, i.description, i.accCriteria,
+        f.name as feature_name,
+        it.name as iteration_name,
+        t.name as team_name,
+        u.name as user_name,
+        u.surname as user_surname,
+        cl.name as classification_name`;
+        propString = isCount ? `COUNT(${'*'}) as sum` : propString;
+        const amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
+        const offsetParam = offset !== 'undefined' ? 'offset ' + offset : '';
+        connection.query(`SELECT ${propString} from issue as i
+        left join iteration as it
+        on it.id = i.iteration_id
+        left join feature as f
+        on f.id = i.feature_id
+        left join team as t
+        on t.id = i.team_id
+        left join user as u
+        on u.id = i.user_id
+        left join issueclassification as cl
+        on cl.id = i.classification_id where i.iteration_id = ${iterationId}
+        ${amountParam} ${offsetParam}`, function (error, results, fields) {
+            console.log(results)
+            if (error) {
+                return error;
+            }
+            return callback(results);
+        });
+    };
     return {
         getIterations,
         deleteIteration,
         insertIteration,
-        updateIteration
+        updateIteration,
+        getIssuesOfIteration
     };
 }

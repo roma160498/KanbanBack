@@ -34,5 +34,12 @@ module.exports = (connection) => {
         }, req.params.featureId);
     });
 
+    router.get('/:featureId/issues', function (req, res) {
+        const params = req.query;
+        methods.getIssuesOfFeature(req.params.featureId, function (result) {
+            res.json(result);
+        },  null, params.amount, params.offset, params.isCount);
+    });
+
     return router;
 };
