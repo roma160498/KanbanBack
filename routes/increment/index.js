@@ -40,9 +40,14 @@ module.exports = (connection) => {
         }, null, params.amount, params.offset, params.isCount);
     });
     router.get('/:incrementId/iterations', function (req, res) {
-        console.log(123)
         const params = req.query;
         methods.getIterationsOfIncrement(function (result) {
+            res.json(result);
+        }, req.params.incrementId, null, params.amount, params.offset, params.isCount);
+    });
+    router.get('/:incrementId/features', function (req, res) {
+        const params = req.query;
+        methods.getFeaturesOfIncrement(function (result) {
             res.json(result);
         }, req.params.incrementId, null, params.amount, params.offset, params.isCount);
     });
