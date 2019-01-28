@@ -13,6 +13,8 @@ module.exports = (connection) => {
     router.use('/featureclassifications', require('./featureclassification')(connection));
     router.use('/increments', require('./increment')(connection));
     router.use('/iterations', require('./iteration')(connection));
+    router.use('/issues', require('./issue')(connection));
+    router.use('/issueclassifications', require('./issueclassification')(connection));
 
     // Authentication operation
     //router.use(require('./authentication')(connection));
