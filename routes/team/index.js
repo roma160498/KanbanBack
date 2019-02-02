@@ -65,5 +65,11 @@ module.exports = (connection) => {
             }
         }, req.params.teamId, req.params.userId, req.body.item)
     });
+    router.get('/:teamId/issues', function (req, res) {
+        const params = req.query;
+        methods.getIssuesOfTeam(function (result) {
+            res.json(result);
+        }, req.params.teamId, null, params.amount, params.offset, params.isCount);
+    });
     return router;
 };
