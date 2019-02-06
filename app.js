@@ -50,7 +50,7 @@ app.use((req, res, next) => {
     res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Origin, Authorization, Accept, Client-Security-Token, Accept-Encoding");
     next();
 });
-app.use(router);
+app.use(authenticationMiddleware(), router);
 
 passport.use(new LocalStrategy({
     username: '',
