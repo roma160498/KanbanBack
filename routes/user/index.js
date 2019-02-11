@@ -3,6 +3,7 @@ module.exports = (connection) => {
     const router = express.Router();
     
     const methods = require('../../models/user/methods')(connection);
+    const permissionMethods = require('../../models/permission/methods')(connection);
     
     router.get('/', function (req, res) {
         const params = req.query;
@@ -13,7 +14,23 @@ module.exports = (connection) => {
     router.post('/', function (req, res) {
         methods.insertUser(function (results, error) {
             if (results) {
-                res.send({ status: 200 });
+                if (req.body.user.is_admin) {
+                    permissionMethods.insertAdminPermissions(function (results, error) {
+                        if (results) {
+                            res.send({ status: 200, insertId: results.insertId });
+                        } else {
+                            res.send({ status: 400 });
+                        }
+                    }, results.insertId);
+                } else {
+                    permissionMethods.insertUserDefaultPermissions(function (results, error) {
+                        if (results) {
+                            res.send({ status: 200, insertId: results.insertId });
+                        } else {
+                            res.send({ status: 400 });
+                        }
+                    }, results.insertId);
+                }
             } else {
                 res.send({ status: 400 });
             }
@@ -28,11 +45,43 @@ module.exports = (connection) => {
     router.put('/:userId', function (req, res) {
         methods.updateUser(function (results, error) {
             if (results) {
-                res.send({ status: 201 });
+                if (req.body.user.is_admin === 0) {
+                    permissionMethods.updateToUserDefaultPermission(function (results, error) {
+                        if (results) {
+                            res.send({ status: 201 });
+                        } else {
+                            res.send({ status: 400 });
+                        }
+                    }, req.params.userId);
+                } else {
+                    permissionMethods.updateToAdminPermission(function (results, error) {
+                        if (results) {
+                            res.send({ status: 201 });
+                        } else {
+                            res.send({ status: 400 });
+                        }
+                    }, req.params.userId);
+                }
             } else {
                 res.send({ status: 401 });
             }
         }, req.params.userId, req.body.user);
-    })
+    });
+
+    router.get('/:userId/permissions', function (req, res) {
+        const params = req.query;
+        methods.getUserPermission(function (result) {
+            res.json(result);
+        }, req.params.userId, null, params.amount, params.offset, params.isCount)
+    });
+    router.put('/:userId/permissions', function (req, res) {
+        methods.updateUserPermission(function (results, error) {
+            if (results) {
+                res.send({ status: 201 });
+            } else {
+                res.send({ status: 401 });
+            }
+        }, req.params.userId, req.body.permissions);
+    });
     return router
 };

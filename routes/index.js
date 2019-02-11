@@ -3,7 +3,6 @@
 module.exports = (connection) => {
     const express = require('express');
     const router = express.Router();
-
     // Items
     router.use('/user', require('./user')(connection));
     router.use('/teams', require('./team')(connection));
@@ -15,6 +14,7 @@ module.exports = (connection) => {
     router.use('/iterations', require('./iteration')(connection));
     router.use('/issues', require('./issue')(connection));
     router.use('/issueclassifications', require('./issueclassification')(connection));
+    router.use('/permissions', require('./permission')(connection));
 
     // Authentication operation
     //router.use(require('./authentication')(connection));
