@@ -3,7 +3,7 @@ module.exports = (connection) => {
     const router = express.Router();
     
     const methods = require('../../models/team/methods')(connection);
-    
+
     router.get('/', function (req, res) {
         const params = req.query;
         methods.getTeams(function (result) {
@@ -68,6 +68,12 @@ module.exports = (connection) => {
     router.get('/:teamId/issues', function (req, res) {
         const params = req.query;
         methods.getIssuesOfTeam(function (result) {
+            res.json(result);
+        }, req.params.teamId, null, params.amount, params.offset, params.isCount);
+    });
+    router.get('/:teamId/issuestates', function (req, res) {
+        const params = req.query;
+        methods.getKanbanOfTeam(function (result) {
             res.json(result);
         }, req.params.teamId, null, params.amount, params.offset, params.isCount);
     });

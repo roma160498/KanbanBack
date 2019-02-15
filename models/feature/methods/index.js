@@ -45,6 +45,7 @@ module.exports = (connection) => {
         }
         statementsString = statementsString.slice(0, -1);
         connection.query(`UPDATE feature SET ${statementsString} where id='${id}'`, function (error, results, fields) {
+            console.log(error)
             if (error) {
                 return callback(null, error);
             }
@@ -67,7 +68,8 @@ module.exports = (connection) => {
         t.name as team_name,
         u.name as user_name,
         u.surname as user_surname,
-        cl.name as classification_name`;
+        cl.name as classification_name,
+        st.name as status_name`;
         propString = isCount ? `COUNT(${'*'}) as sum` : propString;
         const amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
         const offsetParam = offset !== 'undefined' ? 'offset ' + offset : '';
@@ -81,7 +83,9 @@ module.exports = (connection) => {
         left join user as u
         on u.id = i.user_id
         left join issueclassification as cl
-        on cl.id = i.classification_id where i.feature_id = ${featureId}
+        on cl.id = i.classification_id 
+        left join issuestate as st
+        on st.id = i.status_id where i.feature_id = ${featureId}
         ${amountParam} ${offsetParam}`, function (error, results, fields) {
             console.log(results)
             if (error) {

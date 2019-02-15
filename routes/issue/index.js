@@ -12,7 +12,7 @@ module.exports = (connection) => {
     router.post('/', function (req, res) {
         methods.insertIssue(function (results, error) {
             if (results) {
-                res.send({ status: 200 });
+                res.send({ status: 200, insertId: results.insertId });
             } else {
                 res.send({ status: 400 });
             }

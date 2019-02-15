@@ -7,7 +7,8 @@ module.exports = (connection) => {
         t.name as team_name,
         u.name as user_name,
         u.surname as user_surname,
-        cl.name as classification_name`;
+        cl.name as classification_name,
+        st.name as status_name`;
         propString = isCount ? `COUNT(${'*'}) as sum` : propString;
         const amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
         const offsetParam = offset !== 'undefined' ? 'offset ' + offset : '';
@@ -22,6 +23,8 @@ module.exports = (connection) => {
         on u.id = i.user_id
         left join issueclassification as cl
         on cl.id = i.classification_id
+        left join issuestate as st
+        on st.id = i.status_id
         ${amountParam} ${offsetParam}`, function (error, results, fields) {
             console.log(results)
             if (error) {
