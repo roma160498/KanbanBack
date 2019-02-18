@@ -15,6 +15,7 @@ module.exports = (connection) => {
     router.use('/issues', require('./issue')(connection));
     router.use('/issueclassifications', require('./issueclassification')(connection));
     router.use('/permissions', require('./permission')(connection));
+    router.use('/iterationstates', require('./iterationstate')(connection));
 
     // Authentication operation
     //router.use(require('./authentication')(connection));

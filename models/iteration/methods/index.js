@@ -1,13 +1,15 @@
 module.exports = (connection) => {
     const getIterations = (callback, properties, amount, offset, isCount) => {
         let propString =  `i.id, i.name, i.increment_id, i.start_date, i.end_date, i.status_id,
-        i.completeness, i.story_points, inc.name as increment_name`;
+        i.completeness, i.story_points, inc.name as increment_name, st.name as status_name`;
         propString = isCount ? `COUNT(${'*'}) as sum` : propString;
         const amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
         const offsetParam = offset !== 'undefined' ? 'offset ' + offset : '';
         connection.query(`SELECT ${propString} from iteration as i
         inner join increment as inc
         on inc.id = i.increment_id
+        inner join iterationstate as st
+        on st.id = i.status_id
         ${amountParam} ${offsetParam}`, function (error, results, fields) {
             console.log(results)
             if (error) {
