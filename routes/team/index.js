@@ -30,7 +30,7 @@ module.exports = (connection) => {
             if (results) {
                 res.send({ status: 201 });
             } else {
-                res.send({ status: 401 });
+                res.send({ status: 401, message: error.message});
             }
         }, req.params.teamId, req.body.team);
     });

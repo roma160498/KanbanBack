@@ -7,6 +7,7 @@ module.exports = (connection) => {
         t.name as team_name,
         u.name as user_name,
         u.surname as user_surname,
+        u.login as user_login,
         cl.name as classification_name,
         st.name as status_name`;
         propString = isCount ? `COUNT(${'*'}) as sum` : propString;
@@ -55,8 +56,10 @@ module.exports = (connection) => {
         for (let key of Object.keys(issue)) {
             statementsString += `${key}='${issue[key]}',`;
         }
+        console.log(issue)
         statementsString = statementsString.slice(0, -1);
         connection.query(`UPDATE issue SET ${statementsString} where id='${id}'`, function (error, results, fields) {
+            console.log(error)
             if (error) {
                 return callback(null, error);
             }

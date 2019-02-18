@@ -1,5 +1,7 @@
 module.exports = (connection) => {
     const roleInst = require('../../role/methods')(connection);
+    const messageHelper = require('../../../helpers/messageHelper')();
+
     const getTeams = (callback, properties, amount, offset, isCount) => {
         let propString = properties ? properties.join(',') : '*';
         propString = isCount ? `COUNT(${propString}) as sum` : propString;
@@ -76,7 +78,6 @@ module.exports = (connection) => {
         connection.beginTransaction(function (err) {
             if (statementsString) {
                 connection.query(`UPDATE team SET ${statementsString} where id='${id}'`, function (error, results, fields) {
-
                     if (error) {
                         return connection.rollback(function () {
                             return callback(null, error);
@@ -128,7 +129,12 @@ module.exports = (connection) => {
             connection.query(firstQuery, function (error, results, fields) {
                 if (error) {
                     return connection.rollback(function () {
-                        return callback(null, error);
+                        return callback(null, {
+                            message: messageHelper.getMessage(error, {
+                                source: 'team state',
+                                child: 'issue'
+                            })
+                        });
                     });
                 }
                 const secondQuery = isQueryNeed.delete ? deleteQuery :
@@ -137,7 +143,12 @@ module.exports = (connection) => {
                     connection.query(secondQuery, function (error, results, fields) {
                         if (error) {
                             return connection.rollback(function () {
-                                return callback(null, error);
+                                return callback(null, {
+                                    message: messageHelper.getMessage(error, {
+                                        source: 'team state',
+                                        child: 'issue'
+                                    })
+                                });
                             });
                         }
                         const thirdQuery = isQueryNeed.update ? updateQuery : null;
@@ -145,7 +156,12 @@ module.exports = (connection) => {
                             connection.query(thirdQuery, function (error, results, fields) {
                                 if (error) {
                                     return connection.rollback(function () {
-                                        return callback(null, error);
+                                        return callback(null, {
+                                            message: messageHelper.getMessage(error, {
+                                                source: 'team state',
+                                                child: 'issue'
+                                            })
+                                        });
                                     });
                                 }
                                 connection.commit(function (err) {

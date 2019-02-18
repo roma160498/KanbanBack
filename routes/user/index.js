@@ -83,5 +83,12 @@ module.exports = (connection) => {
             }
         }, req.params.userId, req.body.permissions);
     });
+
+    router.get('/:userId/kanbans', function(req, res) {
+        const params = req.query;
+        methods.getKanbansForUser(function (result) {
+            res.json(result);
+        }, req.params.userId, null, params.amount, params.offset, params.isCount)
+    });
     return router
 };
