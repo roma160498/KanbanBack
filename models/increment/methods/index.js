@@ -1,13 +1,15 @@
 module.exports = (connection) => {
     const getIncrements = (callback, properties, amount, offset, isCount) => {
         let propString =  `i.id, i.name, i.product_id, i.start_date, i.end_date, i.status_id,
-        i.business_objectives, p.name as product_name`;
+        i.business_objectives, p.name as product_name, st.name as status_name`;
         propString = isCount ? `COUNT(${'*'}) as sum` : propString;
         const amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
         const offsetParam = offset !== 'undefined' ? 'offset ' + offset : '';
         connection.query(`SELECT ${propString} from increment as i
         inner join product as p
         on p.id = i.product_id
+        left join incrementstate as st
+        on st.id = i.status_id
         ${amountParam} ${offsetParam}`, function (error, results, fields) {
             if (error) {
                 return error;

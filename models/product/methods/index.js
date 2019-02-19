@@ -75,10 +75,12 @@ module.exports = (connection) => {
         let amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
         let offsetParam = offset !== 'undefined' ? 'offset ' + offset : '';
         connection.query(`SELECT i.id, i.name, i.product_id, i.start_date, i.end_date, i.status_id,
-        i.business_objectives, p.name as product_name
+        i.business_objectives, p.name as product_name, st.name as status_name
         from increment as i
         inner join product as p
         on p.id = i.product_id
+        left join incrementstate as st
+        on st.id = i.status_id
         where p.id = ${productId} 
         ${amountParam} ${offsetParam}`, function (error, results, fields) {
             console.log(results)
