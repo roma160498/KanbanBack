@@ -91,7 +91,7 @@ module.exports = (connection) => {
         f.type_id, fc.name as type_name,
         f.team_id, t.name as team_name,
         f.product_id, p.name as product_name,
-        f.increment_id, inc.name as increment_name`;
+        f.increment_id, f.status_id, inc.name as increment_name, st.name as status_name`;
         propString = isCount ? `COUNT(${'*'}) as sum` : propString;
         let amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
         let offsetParam = offset !== 'undefined' ? 'offset ' + offset : '';
@@ -105,6 +105,8 @@ module.exports = (connection) => {
         on p.id = f.product_id 
         left join increment as inc
         on inc.id = f.increment_id 
+        left join featurestate as st
+        on st.id = f.status_id
         where f.increment_id = ${incrementId} ${amountParam} ${offsetParam}`
         connection.query(query, function (error, results, fields) {
             console.log(incrementId)

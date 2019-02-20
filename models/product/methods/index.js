@@ -49,7 +49,7 @@ module.exports = (connection) => {
         connection.query(`SELECT f.name, f.description, f.acc_criteria, f.modified_on, f.created_on, f.closed_on, 
         f.creater_id, concat(u.name, ' ', u.surname) as creator_name,
         f.type_id, fc.name as type_name,
-        f.team_id, t.name as team_name
+        f.team_id, f.status_id, t.name as team_name, st.name as status_name
         from feature as f
         inner join product
         on product.id = f.product_id
@@ -61,6 +61,8 @@ module.exports = (connection) => {
         on t.id = f.team_id
         inner join product as p
         on p.id = f.product_id
+        left join featurestate as st
+        on st.id = f.status_id
         where product.id = ${productId} 
         ${amountParam} ${offsetParam}`, function (error, results, fields) {
                 if (error) {
