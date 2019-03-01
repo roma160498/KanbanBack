@@ -77,5 +77,11 @@ module.exports = (connection) => {
             res.json(result);
         }, req.params.teamId, null, params.amount, params.offset, params.isCount);
     });
+    router.get('/:teamId/kanbans', function(req, res) {
+        const params = req.query;
+        methods.getKanbanBoardForTeam(function (result) {
+            res.json(result);
+        }, req.params.teamId)
+    });
     return router;
 };

@@ -3,6 +3,7 @@ module.exports = (connection) => {
     const router = express.Router();
     
     const methods = require('../../models/issue/methods')(connection);
+    const commentMethods = require('../../models/comment/methods')(connection);
     
     router.delete('/:issueId', function (req, res) {
         methods.deleteIssue(function (results) {
@@ -32,6 +33,12 @@ module.exports = (connection) => {
         methods.getIssues(function (result) {
             res.json(result);
         }, null, params.amount, params.offset, params.isCount);
+    });
+    router.get('/:issueId/comments', function (req, res) {
+        const params = req.query;
+        commentMethods.getCommentsByIssue(function (result) {
+            res.json(result);
+        }, req.params.issueId);
     });
     return router;
 };

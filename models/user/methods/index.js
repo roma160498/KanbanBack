@@ -113,7 +113,7 @@ module.exports = (connection) => {
                     results.forEach(element => {
                         const teamId = element.team_id;
                         const stateId = element.state_id;
-                        const asigneeName = element.user_login ? element.user_name === '' || element.user_surname === '' ? element.user_login : `${element.user_name} ${element.user_surname}` : ' ';
+                        const asigneeName = element.user_login ? element.user_name === '' || element.user_surname === '' ? element.user_login : `${element.user_name} ${element.user_surname}` : 'No assignee';
                         if (tempTeamMap[teamId] || tempTeamMap[teamId] === 0) {
                             if (tempStatesMap[stateId]) {
                                 if (element.issueId) {

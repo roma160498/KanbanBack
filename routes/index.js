@@ -18,6 +18,7 @@ module.exports = (connection) => {
     router.use('/iterationstates', require('./iterationstate')(connection));
     router.use('/incrementstates', require('./incrementstate')(connection));
     router.use('/featurestates', require('./featurestate')(connection));
+    router.use('/comments', require('./comment')(connection));
 
     // Authentication operation
     //router.use(require('./authentication')(connection));

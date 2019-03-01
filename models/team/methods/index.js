@@ -295,6 +295,143 @@ module.exports = (connection) => {
                 return callback(results);
             });
     };
+    const getKanbanBoardForTeam = (callback, teamId) => {
+        connection.beginTransaction(function (err) {
+            connection.query(`SELECT t.id as team_id, 
+            t.name as team_name, 
+            ist.name as state_name, 
+            ist.index as state_index, 
+            ist.max as state_max, 
+            ist.id as state_id,
+            i.name as issue_name,
+            i.user_id as issue_userId,
+            unew.name as user_name,
+            unew.surname as user_surname,
+            unew.login as user_login,
+            i.classification_id as issues_classificationId,
+            i.iteration_id as issue_iterationId,
+            i.name as issue_iterationName,
+            i.story_points as issue_stPoint,
+            i.id as issueId
+            FROM team as t
+            
+            left join issuestate as ist
+            on t.id = ist.team_id
+            left join issue as i
+            on i.status_id = ist.id
+            left join user as unew
+            on i.user_id = unew.id
+            where t.id = ${teamId};`, function (error, results, fields) {
+                console.log(results)
+                if (error) {
+                    return connection.rollback(function () {
+                        return callback(null, error);
+                    });
+                }
+                if (results.length) {
+                    const kanbansArray = [];
+                    const tempTeamMap = {};
+                    const tempStatesMap = {};
+                    results.forEach(element => {
+                        const teamId = element.team_id;
+                        const stateId = element.state_id;
+                        const asigneeName = element.user_login ? element.user_name === '' || element.user_surname === '' ? element.user_login : `${element.user_name} ${element.user_surname}` : ' ';
+                        if (tempTeamMap[teamId] || tempTeamMap[teamId] === 0) {
+                            if (tempStatesMap[stateId]) {
+                                if (element.issueId) {
+                                    const tempTeam = kanbansArray[tempTeamMap[tempStatesMap[stateId].teamId]];
+                                    const tempState = tempTeam.states[tempStatesMap[stateId].indexInStates];
+                                    tempState.issues.push({
+                                        id: element.issueId,
+                                        userId: element.issue_userId,
+                                        userName: asigneeName,
+                                        classification: element.issues_classificationId,
+                                        iteration: element.issue_iterationId,
+                                        name: element.issue_name,
+                                        storyPoints: element.issue_stPoint,
+                                        stateId: stateId,
+                                        teamId: teamId
+                                    });
+                                }
+                            } else {
+                                const statesArray = kanbansArray[tempTeamMap[teamId]].states;
+                                tempStatesMap[stateId] = { teamId: teamId, indexInStates: statesArray.length };
+                                const issuesArray = [];
+                                if (element.issueId) {
+                                    issuesArray.push({
+                                        id: element.issueId,
+                                        userId: element.issue_userId,
+                                        userName: asigneeName,
+                                        classification: element.issues_classificationId,
+                                        iteration: element.issue_iterationId,
+                                        name: element.issue_name,
+                                        storyPoints: element.issue_stPoint,
+                                        stateId: stateId,
+                                        teamId: teamId
+                                    });
+                                }
+                                statesArray.push({
+                                    name: element.state_name,
+                                    id: element.state_id,
+                                    max: element.state_max,
+                                    index: element.state_index,
+                                    issues: issuesArray
+                                });
+                            }
+                        } else {
+                            tempTeamMap[teamId] = kanbansArray.length;
+                            const issuesArray = [];
+                            if (element.issueId) {
+                                issuesArray.push({
+                                    id: element.issueId,
+                                    userId: element.issue_userId,
+                                    userName: asigneeName,
+                                    classification: element.issues_classificationId,
+                                    iteration: element.issue_iterationId,
+                                    iterationName: element.issue_iterationName,
+                                    name: element.issue_name,
+                                    storyPoints: element.issue_stPoint,
+                                    stateId: stateId,
+                                    teamId: teamId
+                                });
+                            } 
+                            kanbansArray.push({
+                                name: element.team_name,
+                                id: teamId,
+                                states: [{
+                                    name: element.state_name,
+                                    id: element.state_id,
+                                    max: element.state_max,
+                                    index: element.state_index,
+                                    issues: issuesArray
+                                }]
+                            });
+                            tempStatesMap[stateId] = { teamId: teamId, indexInStates: 0 };
+                        }
+                    });
+                    kanbansArray.forEach(element => {
+                        element.states.sort((a, b) => {
+                            if (a.index > b.index) {
+                                return 1;
+                            }
+                            if (a.index < b.index) {
+                                return -1;
+                            }
+                            return 0;
+                        });
+                    })
+                    connection.commit(function (err) {
+                        if (err) {
+                            return connection.rollback(function () {
+                                throw err;
+                            });
+                        }
+                        return callback(kanbansArray);
+                    });
+                }
+            });
+        });
+    };
     return {
         getTeams,
         deleteTeam,
@@ -305,6 +442,7 @@ module.exports = (connection) => {
         insertUsersOfTeam,
         updateUsersOfTeam,
         getIssuesOfTeam,
-        getKanbanOfTeam
+        getKanbanOfTeam,
+        getKanbanBoardForTeam
     };
 }
