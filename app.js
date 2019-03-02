@@ -50,7 +50,7 @@ app.use((req, res, next) => {
     res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Origin, Authorization, Accept, Client-Security-Token, Accept-Encoding");
     next();
 });
-app.use(authenticationMiddleware(), router);
+app.use(router);
 
 passport.use(new LocalStrategy({
     username: '',
@@ -63,6 +63,10 @@ passport.use(new LocalStrategy({
         if (!user || password !== user['password']) {
             return done(null, false)
         }
+        console.log(user)
+        if (user && user['is_initialPassword'] === 1) {
+            return done(null, user, 406)
+        }
         return done(null, user)
     })
 }));
@@ -73,7 +77,6 @@ passport.serializeUser(function (user, done) {
 });
 passport.deserializeUser(function (user, done) {
     try {
-        console.log(user);
         done(null, JSON.parse(user));
     } catch (error) {
         done(error)
@@ -87,10 +90,15 @@ app.post('/login', function (req, res, next) {
         successRedirect: 'http://localhost:4200/admin',
         failureRedirect: 'http://localhost:4200/login',
         session: false
-    }, (error, user) => {
-        req.login(user, function (err) { })
+    }, (error, user, code) => {
+        console.log(code)
         if (user) {
-            res.send({ status: 200, user: user });
+            if (code === 406) {
+                res.send({ status: 406, user: user });
+            } else {
+                req.login(user, function (err) { })
+                res.send({ status: 200, user: user });
+            }
         } else {
             res.send({ status: 401, user: user });
         }

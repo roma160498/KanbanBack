@@ -12,7 +12,7 @@ module.exports = (connection) => {
         });
     };
     const insertUser = (callback, user) => {
-        connection.query(`INSERT INTO user (login, password, name, surname, email, is_admin) Values ("${user['login']}", "${user['password']}", "${user['name']}", "${user['surname']}", "${user['email']}", ${user['is_admin']})`, function (error, results, fields) {
+        connection.query(`INSERT INTO user (login, password, name, surname, email, is_admin, is_initialPassword) Values ("${user['login']}", "${user['password']}", "${user['name']}", "${user['surname']}", "${user['email']}", ${user['is_admin']}, ${user['is_initialPassword']})`, function (error, results, fields) {
             if (error) {
                 return callback(null, error);
             }
