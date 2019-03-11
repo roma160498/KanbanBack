@@ -44,7 +44,11 @@ module.exports = (connection) => {
     const updateFeature = (callback, id, feature) => {
         let statementsString = '';
         for (let key of Object.keys(feature)) {
-            statementsString += `${key}='${feature[key]}',`;
+            if (key !== 'closed_on') {
+                statementsString += `${key}='${feature[key]}',`;
+            } else {
+                statementsString += feature[key] ? `${key}='${feature[key]}',` : `${key}=${feature[key]},`;
+            }
         }
         statementsString = statementsString.slice(0, -1);
         connection.query(`UPDATE feature SET ${statementsString} where id='${id}'`, function (error, results, fields) {
@@ -65,7 +69,7 @@ module.exports = (connection) => {
     };
     const getIssuesOfFeature = (featureId, callback, properties, amount, offset, isCount) => {
         let propString =  `i.id, i.status_id, i.feature_id, i.iteration_id, i.classification_id, i.team_id,
-        i.user_id, i.story_points, i.completeness, i.name, i.description, i.accCriteria,
+        i.user_id, i.story_points, i.completeness, i.name, i.description, i.accCriteria, i.closed_on,
         f.name as feature_name,
         it.name as iteration_name,
         t.name as team_name,

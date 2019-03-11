@@ -50,7 +50,7 @@ module.exports = (connection) => {
 
     getIssuesOfIteration = (iterationId, callback, properties, amount, offset, isCount) => {
         let propString =  `i.id, i.status_id, i.feature_id, i.iteration_id, i.classification_id, i.team_id,
-        i.user_id, i.story_points, i.completeness, i.name, i.description, i.accCriteria,
+        i.user_id, i.story_points, i.completeness, i.name, i.description, i.accCriteria, i.closed_on,
         f.name as feature_name,
         it.name as iteration_name,
         t.name as team_name,

@@ -81,6 +81,7 @@ module.exports = (connection) => {
             ist.id as state_id,
             i.name as issue_name,
             i.user_id as issue_userId,
+            i.closed_on,
             unew.name as user_name,
             unew.surname as user_surname,
             unew.login as user_login,
@@ -128,7 +129,8 @@ module.exports = (connection) => {
                                         name: element.issue_name,
                                         storyPoints: element.issue_stPoint,
                                         stateId: stateId,
-                                        teamId: teamId
+                                        teamId: teamId,
+                                        isClosed: !!element.closed_on
                                     });
                                 }
                             } else {
@@ -145,7 +147,8 @@ module.exports = (connection) => {
                                         name: element.issue_name,
                                         storyPoints: element.issue_stPoint,
                                         stateId: stateId,
-                                        teamId: teamId
+                                        teamId: teamId,
+                                        isClosed: !!element.closed_on
                                     });
                                 }
                                 statesArray.push({
@@ -170,7 +173,8 @@ module.exports = (connection) => {
                                     name: element.issue_name,
                                     storyPoints: element.issue_stPoint,
                                     stateId: stateId,
-                                    teamId: teamId
+                                    teamId: teamId,
+                                    isClosed: !!element.closed_on
                                 });
                             } 
                             kanbansArray.push({

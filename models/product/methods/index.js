@@ -46,7 +46,7 @@ module.exports = (connection) => {
         propString = isCount ? `COUNT(${propString}) as sum` : propString;
         let amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
         let offsetParam = offset !== 'undefined' ? 'offset ' + offset : '';
-        connection.query(`SELECT f.name, f.description, f.acc_criteria, f.modified_on, f.created_on, f.closed_on, 
+        connection.query(`SELECT f.name, f.description, f.acc_criteria, f.modified_on, f.created_on, f.closed_on, f.increment_id,
         f.creater_id, concat(u.name, ' ', u.surname) as creator_name,
         f.type_id, fc.name as type_name,
         f.team_id, f.status_id, t.name as team_name, st.name as status_name

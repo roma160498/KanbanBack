@@ -1,7 +1,8 @@
 module.exports = (connection) => {
     const getIssues = (callback, properties, amount, offset, isCount) => {
-        let propString =  `i.id, i.status_id, i.feature_id, i.iteration_id, i.classification_id, i.team_id,
+        let propString = `i.id, i.status_id, i.feature_id, i.iteration_id, i.classification_id, i.team_id,
         i.user_id, i.story_points, i.completeness, i.name, i.description, i.accCriteria,
+        i.modified_on, i.created_on, i.closed_on,
         f.name as feature_name,
         it.name as iteration_name,
         t.name as team_name,
@@ -27,12 +28,12 @@ module.exports = (connection) => {
         left join issuestate as st
         on st.id = i.status_id
         ${amountParam} ${offsetParam}`, function (error, results, fields) {
-            console.log(results)
-            if (error) {
-                return error;
-            }
-            return callback(results);
-        });
+                console.log(results)
+                if (error) {
+                    return error;
+                }
+                return callback(results);
+            });
     };
     const deleteIssue = (callback, id) => {
         connection.query(`DELETE from issue where id="${id}"`, function (error, results, fields) {
@@ -43,27 +44,77 @@ module.exports = (connection) => {
         });
     };
     const insertIssue = (callback, issue) => {
-        connection.query(`INSERT INTO issue (status_id, feature_id, iteration_id, classification_id, team_id, user_id, story_points, completeness, name, description, accCriteria) Values (${issue['status_id']}, ${issue['feature_id']}, ${issue['iteration_id']},  ${issue['classification_id']}, ${issue['team_id']}, ${issue['user_id']}, ${issue['story_points']}, ${issue['completeness']}, "${issue['name']}", "${issue['description']}", "${issue['accCriteria']}")`, function (error, results, fields) {
-            console.log(error);
-            if (error) {
-                return callback(null, error);
-            }
-            return callback(results);
+        connection.beginTransaction(function (err) {
+            connection.query(`INSERT INTO issue (status_id, feature_id, iteration_id, classification_id, team_id, user_id, story_points, completeness, name, description, accCriteria) Values (${issue['status_id']}, ${issue['feature_id']}, ${issue['iteration_id']},  ${issue['classification_id']}, ${issue['team_id']}, ${issue['user_id']}, ${issue['story_points']}, ${issue['completeness']}, "${issue['name']}", "${issue['description']}", "${issue['accCriteria']}")`, function (error, results, fields) {
+                if (error) {
+                    return connection.rollback(function () {
+                        return callback(null, error);
+                    });
+                }
+                connection.commit(function (err) {
+                    if (err) {
+                        return connection.rollback(function () {
+                            throw err;
+                        });
+                    }
+                    return callback(results);
+                });
+            });
         });
     };
     const updateIssue = (callback, id, issue) => {
         let statementsString = '';
-        for (let key of Object.keys(issue)) {
-            statementsString += `${key}='${issue[key]}',`;
-        }
+        let needToUpdateCompleteness = null;
+        let needToUpdateSP = 0;
         console.log(issue)
-        statementsString = statementsString.slice(0, -1);
-        connection.query(`UPDATE issue SET ${statementsString} where id='${id}'`, function (error, results, fields) {
-            console.log(error)
-            if (error) {
-                return callback(null, error);
+        for (let key of Object.keys(issue)) {
+            if (key === 'story_points') {
+                needToUpdateSP = issue[key];
             }
-            return callback(results);
+            if (key !== 'closed_on') {
+                statementsString += `${key}='${issue[key]}',`;
+            } else {
+                statementsString += issue[key] ? `${key}='${issue[key]}',` : `${key}=${issue[key]},`;
+                needToUpdateCompleteness = issue[key] ? issue['story_points'] : -issue['story_points'];
+            }
+        }
+        console.log(needToUpdateSP)
+        statementsString = statementsString.slice(0, -1);
+        connection.beginTransaction(function () {
+            connection.query(`UPDATE issue SET ${statementsString} where id='${id}'`, function (error, results, fields) {
+                if (error) {
+                    return connection.rollback(function () {
+                        return callback(null, error);
+                    });
+                }
+                if (needToUpdateCompleteness !== null) {
+                    connection.query(`UPDATE iteration SET completeness = completeness + ${needToUpdateCompleteness} where id='${issue.iteration_id}'`, function (error, res, fields) {
+                        console.log(error)
+                        if (error) {
+                            return connection.rollback(function () {
+                                return callback(null, error);
+                            });
+                        }
+                        connection.commit(function (err) {
+                            if (err) {
+                                return connection.rollback(function () {
+                                    throw err;
+                                });
+                            }
+                            return callback(results);
+                        });
+                    });
+                } else {
+                    connection.commit(function (err) {
+                        if (err) {
+                            return connection.rollback(function () {
+                                throw err;
+                            });
+                        }
+                        return callback(results);
+                    });
+                }
+            });
         });
     };
     return {
