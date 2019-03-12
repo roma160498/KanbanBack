@@ -47,19 +47,19 @@ module.exports = (connection) => {
         let amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
         let offsetParam = offset !== 'undefined' ? 'offset ' + offset : '';
         connection.query(`SELECT f.name, f.description, f.acc_criteria, f.modified_on, f.created_on, f.closed_on, f.increment_id,
-        f.creater_id, concat(u.name, ' ', u.surname) as creator_name,
+        f.creater_id, concat(u.name, ' ', u.surname) as creator_name, f.wsjf,
         f.type_id, fc.name as type_name,
         f.team_id, f.status_id, t.name as team_name, st.name as status_name
         from feature as f
-        inner join product
+        left join product
         on product.id = f.product_id
-        inner join user as u
+        left join user as u
         on u.id = f.creater_id
-        inner join featureclassification as fc
+        left join featureclassification as fc
         on fc.id = f.type_id
-        inner join team as t
+        left join team as t
         on t.id = f.team_id
-        inner join product as p
+        left join product as p
         on p.id = f.product_id
         left join featurestate as st
         on st.id = f.status_id

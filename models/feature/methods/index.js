@@ -1,6 +1,7 @@
 module.exports = (connection) => {
     const getFeatures = (callback, properties, amount, offset, isCount) => {
         let propString = `f.id, f.name, f.description, f.acc_criteria, f.modified_on, f.created_on, f.closed_on,
+        f.ub_value, f.time_crit, f.risk_red, f.job_size, f.wsjf,
         f.creater_id, concat(u.name, ' ', u.surname) as creator_name,
         f.type_id, fc.name as type_name,
         f.team_id, t.name as team_name,
@@ -10,13 +11,13 @@ module.exports = (connection) => {
         propString = isCount ? `COUNT(${'*'}) as sum` : propString;
         let amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
         let offsetParam = offset !== 'undefined' ? 'offset ' + offset : '';
-        const query = `SELECT ${propString} from feature as f inner join user as u
+        const query = `SELECT ${propString} from feature as f left join user as u
         on u.id = f.creater_id
-        inner join featureclassification as fc
+        left join featureclassification as fc
         on fc.id = f.type_id
-        inner join team as t
+        left join team as t
         on t.id = f.team_id
-        inner join product as p
+        left join product as p
         on p.id = f.product_id 
         left join increment as inc
         on inc.id = f.increment_id
@@ -31,8 +32,8 @@ module.exports = (connection) => {
         });
     };
     const insertFeature = (callback, feature) => {
-        connection.query(`INSERT INTO feature (name, type_id, creater_id, team_id, description, acc_criteria, product_id, status_id)
-         Values ("${feature['name']}", ${feature['type_id']}, ${feature['creater_id']}, ${feature['team_id']}, "${feature['description']}", "${feature['acc_criteria']}", ${feature['product_id']}, ${feature['status_id']})`, function (error, results, fields) {
+        connection.query(`INSERT INTO feature (name, type_id, creater_id, team_id, description, acc_criteria, product_id, status_id, ub_value, time_crit, risk_red, job_size, wsjf)
+         Values ("${feature['name']}", ${feature['type_id']}, ${feature['creater_id']}, ${feature['team_id']}, "${feature['description']}", "${feature['acc_criteria']}", ${feature['product_id']}, ${feature['status_id']}, ${feature['ub_value']}, ${feature['time_crit']}, ${feature['risk_red']}, ${feature['job_size']}, ${_recalculateWSJF(feature['ub_value'], feature['time_crit'], feature['risk_red'], feature['job_size'])})`, function (error, results, fields) {
 
                 console.log(error)
             if (error) {
@@ -44,7 +45,7 @@ module.exports = (connection) => {
     const updateFeature = (callback, id, feature) => {
         let statementsString = '';
         for (let key of Object.keys(feature)) {
-            if (key !== 'closed_on') {
+            if (key !== 'closed_on' && key !== 'ub_value' && key !== 'time_crit' && key !== 'risk_red' && key !== 'job_size') {
                 statementsString += `${key}='${feature[key]}',`;
             } else {
                 statementsString += feature[key] ? `${key}='${feature[key]}',` : `${key}=${feature[key]},`;
@@ -100,6 +101,12 @@ module.exports = (connection) => {
             }
             return callback(results);
         });
+    };
+    const _recalculateWSJF = (ub_value, time_crit, risk_red, job_size) => {
+        if (ub_value !== null && time_crit !== null && risk_red !== null && job_size !== null && job_size !== 0) {
+            return (ub_value + time_crit + risk_red) / job_size;
+        }
+        return null;
     };
     return {
         getFeatures,

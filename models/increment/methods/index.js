@@ -87,7 +87,7 @@ module.exports = (connection) => {
     };
     const getFeaturesOfIncrement = (callback, incrementId, properties, amount, offset, isCount) => {
         let propString = `f.id, f.name, f.description, f.acc_criteria, f.modified_on, f.created_on, f.closed_on,
-        f.creater_id, concat(u.name, ' ', u.surname) as creator_name,
+        f.creater_id, concat(u.name, ' ', u.surname) as creator_name, f.wsjf,
         f.type_id, fc.name as type_name,
         f.team_id, t.name as team_name,
         f.product_id, p.name as product_name,
@@ -95,13 +95,13 @@ module.exports = (connection) => {
         propString = isCount ? `COUNT(${'*'}) as sum` : propString;
         let amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
         let offsetParam = offset !== 'undefined' ? 'offset ' + offset : '';
-        const query = `SELECT ${propString} from feature as f inner join user as u
+        const query = `SELECT ${propString} from feature as f left join user as u
         on u.id = f.creater_id
-        inner join featureclassification as fc
+        left join featureclassification as fc
         on fc.id = f.type_id
-        inner join team as t
+        left join team as t
         on t.id = f.team_id
-        inner join product as p
+        left join product as p
         on p.id = f.product_id 
         left join increment as inc
         on inc.id = f.increment_id 
