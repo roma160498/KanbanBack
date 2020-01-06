@@ -12,7 +12,6 @@ module.exports = (connection) => {
     });
 
     router.delete('/:userId', function (req, res) {
-        console.log(123)
         methods.removeMentionsNofication(function (results) {
             res.send({ status: 200 });
         }, req.params.userId);

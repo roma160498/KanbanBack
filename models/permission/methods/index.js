@@ -100,11 +100,9 @@ module.exports = (connection) => {
     };
 
     const insertAdminPermissions = (callback, userId) => {
-        console.log(userId + '111')
         const jsonPerm = JSON.stringify(defaultAdminPermissions);
         connection.query(`INSERT INTO permission (user_id, permissions) values
         (${userId}, '${jsonPerm}')`, function (error, results, fields) {
-            console.log(error)
             if (error) {
                 return callback(null, error);
             }
@@ -113,7 +111,6 @@ module.exports = (connection) => {
     };
 
     const updateToUserDefaultPermission = (callback, userId) => {
-        console.log(userId+'2222')
         const jsonPerm = JSON.stringify(deafultUserPermissions);
         connection.query(`UPDATE permission SET permissions='${jsonPerm}' where user_id=${userId}`, function(error, results, fields) {
             if (error) {
@@ -126,7 +123,6 @@ module.exports = (connection) => {
     const updateToAdminPermission = (callback, userId) => {
         const jsonPerm = JSON.stringify(defaultAdminPermissions);
         connection.query(`UPDATE permission SET permissions='${jsonPerm}' where user_id=${userId}`, function (error, results, fields) {
-            console.log(error)
             if (error) {
                 return callback(null, error);
             }

@@ -24,7 +24,6 @@ module.exports = (connection) => {
         left join featurestate as st
         on st.id = f.status_id ${amountParam} ${offsetParam}`
         connection.query(query, function (error, results, fields) {
-            console.log(error)
             if (error) {
                 return error;
             }
@@ -34,8 +33,7 @@ module.exports = (connection) => {
     const insertFeature = (callback, feature) => {
         connection.query(`INSERT INTO feature (name, type_id, creater_id, team_id, description, acc_criteria, product_id, status_id, ub_value, time_crit, risk_red, job_size, wsjf)
          Values ("${feature['name']}", ${feature['type_id']}, ${feature['creater_id']}, ${feature['team_id']}, "${feature['description']}", "${feature['acc_criteria']}", ${feature['product_id']}, ${feature['status_id']}, ${feature['ub_value']}, ${feature['time_crit']}, ${feature['risk_red']}, ${feature['job_size']}, ${_recalculateWSJF(feature['ub_value'], feature['time_crit'], feature['risk_red'], feature['job_size'])})`, function (error, results, fields) {
-
-                console.log(error)
+console.log(error)
             if (error) {
                 return callback(null, error);
             }
@@ -53,7 +51,6 @@ module.exports = (connection) => {
         }
         statementsString = statementsString.slice(0, -1);
         connection.query(`UPDATE feature SET ${statementsString} where id='${id}'`, function (error, results, fields) {
-            console.log(error)
             if (error) {
                 return callback(null, error);
             }
@@ -95,7 +92,6 @@ module.exports = (connection) => {
         left join issuestate as st
         on st.id = i.status_id where i.feature_id = ${featureId}
         ${amountParam} ${offsetParam}`, function (error, results, fields) {
-            console.log(results)
             if (error) {
                 return error;
             }

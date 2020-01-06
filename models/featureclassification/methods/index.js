@@ -5,7 +5,6 @@ module.exports = (connection) => {
         let amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
         let offsetParam = offset !== 'undefined' ? 'offset ' + offset : '';
         connection.query(`SELECT ${propString} from featureclassification ${amountParam} ${offsetParam}`, function (error, results, fields) {
-            console.log(error)
             if (error) {
                 return error;
             }

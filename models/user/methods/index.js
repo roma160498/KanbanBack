@@ -1,5 +1,6 @@
 module.exports = (connection) => {
     const getUsers = (callback, properties, amount, offset, isCount) => {
+       console.log('11111')
         let propString = properties ? properties.join(',') : '*';
         propString = isCount ? `COUNT(${propString}) as sum` : propString;
         const amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
@@ -34,7 +35,6 @@ module.exports = (connection) => {
         }
         statementsString = statementsString.slice(0, -1);
         connection.query(`UPDATE user SET ${statementsString} where id='${id}'`, function (error, results, fields) {
-            console.log(error)
             if (error) {
                 return callback(null, error);
             }

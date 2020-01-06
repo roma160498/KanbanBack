@@ -46,7 +46,6 @@ module.exports = (connection) => {
         connection.query(`Select com.*, u.name, u.surname, u.login from comments as com left join user as u on u.id = com.user_id
         where com.issue_id=${issueId}`, function (error, results, fields) {
                 if (error) {
-                    console.log(error)
                     return callback(null, error);
                 }
                 const commentMap = {};
@@ -67,7 +66,6 @@ module.exports = (connection) => {
                         comments.push(commentMap[key]);
                     }
                 }
-                console.log(comments)
                 return callback(comments);
             });
     }

@@ -23,7 +23,9 @@ module.exports = (connection) => {
         });
     };
     const deleteTeam = (callback, id) => {
+        console.log(id)
         connection.query(`DELETE from team where id="${id}"`, function (error, results, fields) {
+            console.log(error)
             if (error) {
                 return error;
             }
@@ -288,7 +290,6 @@ module.exports = (connection) => {
         left join issuestate as st
         on st.id = i.status_id where i.team_id = ${teamId}
         ${amountParam} ${offsetParam}`, function (error, results, fields) {
-                console.log(results)
                 if (error) {
                     return error;
                 }
@@ -322,7 +323,6 @@ module.exports = (connection) => {
             left join user as unew
             on i.user_id = unew.id
             where t.id = ${teamId};`, function (error, results, fields) {
-                console.log(results)
                 if (error) {
                     return connection.rollback(function () {
                         return callback(null, error);

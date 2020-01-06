@@ -53,7 +53,7 @@ module.exports = (connection) => {
                             res.send({ status: 400 });
                         }
                     }, req.params.userId);
-                } else {
+                } else if (req.body.user.is_admin === 1) {
                     permissionMethods.updateToAdminPermission(function (results, error) {
                         if (results) {
                             res.send({ status: 201 });
@@ -61,6 +61,8 @@ module.exports = (connection) => {
                             res.send({ status: 400 });
                         }
                     }, req.params.userId);
+                } else {
+                    res.send({ status: 201 });
                 }
             } else {
                 res.send({ status: 401 });

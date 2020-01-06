@@ -15,6 +15,13 @@ const sqlOptions = {
     password: 'root',
     database: 'kanban_board'
 }
+/*const connectionsPool  = mysql.createPool({
+    connectionLimit : 100,
+    host: 'localhost',
+    user: 'root',
+    password: 'root',
+    database: 'kanban_board'
+  });*/
 const connection = mysql.createConnection(sqlOptions);
 const sessionStore = new MySqlStore(sqlOptions);
 const router = require('./routes')(connection, sqlOptions);
@@ -63,7 +70,6 @@ passport.use(new LocalStrategy({
         if (!user || password !== user['password']) {
             return done(null, false)
         }
-        console.log(user)
         if (user && user['is_initialPassword'] === 1) {
             return done(null, user, 406)
         }
@@ -72,7 +78,6 @@ passport.use(new LocalStrategy({
 }));
 
 passport.serializeUser(function (user, done) {
-    console.log('serialized');
     done(null, JSON.stringify(user));
 });
 passport.deserializeUser(function (user, done) {
@@ -91,7 +96,6 @@ app.post('/login', function (req, res, next) {
         failureRedirect: 'http://localhost:4200/login',
         session: false
     }, (error, user, code) => {
-        console.log(code)
         if (user) {
             if (code === 406) {
                 res.send({ status: 406, user: user });

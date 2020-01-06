@@ -21,8 +21,5 @@ module.exports = (connection) => {
     router.use('/comments', require('./comment')(connection));
     router.use('/mentions', require('./mention')(connection));
 
-    // Authentication operation
-    //router.use(require('./authentication')(connection));
-
     return router;
 };

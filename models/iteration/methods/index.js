@@ -11,7 +11,6 @@ module.exports = (connection) => {
         inner join iterationstate as st
         on st.id = i.status_id
         ${amountParam} ${offsetParam}`, function (error, results, fields) {
-            console.log(results)
             if (error) {
                 return error;
             }
@@ -75,7 +74,6 @@ module.exports = (connection) => {
         left join issuestate as st
         on st.id = i.status_id where i.iteration_id = ${iterationId}
         ${amountParam} ${offsetParam}`, function (error, results, fields) {
-            console.log(results)
             if (error) {
                 return error;
             }

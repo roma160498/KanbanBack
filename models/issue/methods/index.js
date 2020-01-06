@@ -28,7 +28,6 @@ module.exports = (connection) => {
         left join issuestate as st
         on st.id = i.status_id
         ${amountParam} ${offsetParam}`, function (error, results, fields) {
-                console.log(results)
                 if (error) {
                     return error;
                 }
@@ -66,7 +65,6 @@ module.exports = (connection) => {
         let statementsString = '';
         let needToUpdateCompleteness = null;
         let needToUpdateSP = 0;
-        console.log(issue)
         for (let key of Object.keys(issue)) {
             if (key === 'story_points') {
                 needToUpdateSP = issue[key];
@@ -78,7 +76,6 @@ module.exports = (connection) => {
                 needToUpdateCompleteness = issue[key] ? issue['story_points'] : -issue['story_points'];
             }
         }
-        console.log(needToUpdateSP)
         statementsString = statementsString.slice(0, -1);
         connection.beginTransaction(function () {
             connection.query(`UPDATE issue SET ${statementsString} where id='${id}'`, function (error, results, fields) {
@@ -89,7 +86,6 @@ module.exports = (connection) => {
                 }
                 if (needToUpdateCompleteness !== null) {
                     connection.query(`UPDATE iteration SET completeness = completeness + ${needToUpdateCompleteness} where id='${issue.iteration_id}'`, function (error, res, fields) {
-                        console.log(error)
                         if (error) {
                             return connection.rollback(function () {
                                 return callback(null, error);

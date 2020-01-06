@@ -85,7 +85,6 @@ module.exports = (connection) => {
         on st.id = i.status_id
         where p.id = ${productId} 
         ${amountParam} ${offsetParam}`, function (error, results, fields) {
-            console.log(results)
                 if (error) {
                     return error;
                 }

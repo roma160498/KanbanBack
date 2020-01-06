@@ -1,4 +1,3 @@
-// TODO: IS NOT USED. WHY???
 module.exports = (connection, sqlOptions) => {
     const express = require('express');
     const router = express.Router();
@@ -46,12 +45,10 @@ module.exports = (connection, sqlOptions) => {
     }));
     
     passport.serializeUser(function (user, done) {
-        console.log('serialized');
         done(null, JSON.stringify(user));
     });
     passport.deserializeUser(function (user, done) {
         try {
-            console.log(user);
             done(null, JSON.parse(user));
         } catch (error) {
             done(error)
