@@ -20,6 +20,7 @@ module.exports = (connection) => {
     router.use('/featurestates', require('./featurestate')(connection));
     router.use('/comments', require('./comment')(connection));
     router.use('/mentions', require('./mention')(connection));
+    router.use('/files', require('./file')(connection));
 
     return router;
 };
