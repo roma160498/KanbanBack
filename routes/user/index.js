@@ -34,7 +34,7 @@ module.exports = (connection) => {
             } else {
                 res.send({ status: 400 });
             }
-        }, req.body.user);
+        }, req.body.user, req.body.userName);
     });
     router.delete('/:userId', function (req, res) {
         console.log(req.params.reqId)
@@ -67,7 +67,7 @@ module.exports = (connection) => {
             } else {
                 res.send({ status: 401 });
             }
-        }, req.params.userId, req.body.user);
+        }, req.params.userId, req.body.user, req.body.diff, req.body.userName);
     });
 
     router.get('/:userId/permissions', function (req, res) {

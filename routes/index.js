@@ -21,6 +21,7 @@ module.exports = (connection) => {
     router.use('/comments', require('./comment')(connection));
     router.use('/mentions', require('./mention')(connection));
     router.use('/files', require('./file')(connection));
+    router.use('/history', require('./history')(connection));
 
     return router;
 };

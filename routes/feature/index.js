@@ -17,7 +17,7 @@ module.exports = (connection) => {
             } else {
                 res.send({ status: 400 });
             }
-        }, req.body.feature);
+        }, req.body.feature, req.body.userName);
     });
     router.put('/:featureId', function (req, res) {
         methods.updateFeature(function (results, error) {
@@ -26,7 +26,7 @@ module.exports = (connection) => {
             } else {
                 res.send({ status: 401 });
             }
-        }, req.params.featureId, req.body.feature);
+        }, req.params.featureId, req.body.feature, req.body.diff, req.body.userName);
     });
     router.delete('/:featureId', function (req, res) {
         methods.deleteFeature(function (results) {

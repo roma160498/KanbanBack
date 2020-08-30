@@ -17,7 +17,7 @@ module.exports = (connection) => {
             } else {
                 res.send({ status: 400 });
             }
-        }, req.body.issue);
+        }, req.body.issue, req.body.userName);
     });
     router.put('/:issueId', function (req, res) {
         methods.updateIssue(function (results, error) {
@@ -26,7 +26,7 @@ module.exports = (connection) => {
             } else {
                 res.send({ status: 401 });
             }
-        }, req.params.issueId, req.body.issue);
+        }, req.params.issueId, req.body.issue, req.body.diff, req.body.userName);
     });
     router.get('/', function (req, res) {
         const params = req.query;

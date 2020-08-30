@@ -45,9 +45,11 @@ module.exports = (connection, sqlOptions) => {
     }));
     
     passport.serializeUser(function (user, done) {
+        console.log('ser')
         done(null, JSON.stringify(user));
     });
     passport.deserializeUser(function (user, done) {
+        console.log('des')
         try {
             done(null, JSON.parse(user));
         } catch (error) {

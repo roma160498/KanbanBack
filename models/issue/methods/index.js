@@ -1,4 +1,6 @@
 module.exports = (connection) => {
+    const historyMethods = require('../../history/methods')(connection);
+
     const getIssues = (callback, properties, amount, offset, isCount) => {
         let propString = `i.id, i.status_id, i.feature_id, i.iteration_id, i.classification_id, i.team_id,
         i.user_id, i.story_points, i.completeness, i.name, i.description, i.accCriteria,
@@ -42,26 +44,34 @@ module.exports = (connection) => {
             return callback(results);
         });
     };
-    const insertIssue = (callback, issue) => {
+    const insertIssue = (callback, issue, userName) => {
         connection.beginTransaction(function (err) {
             connection.query(`INSERT INTO issue (status_id, feature_id, iteration_id, classification_id, team_id, user_id, story_points, completeness, name, description, accCriteria) Values (${issue['status_id']}, ${issue['feature_id']}, ${issue['iteration_id']},  ${issue['classification_id']}, ${issue['team_id']}, ${issue['user_id']}, ${issue['story_points']}, ${issue['completeness']}, "${issue['name']}", "${issue['description']}", "${issue['accCriteria']}")`, function (error, results, fields) {
                 if (error) {
+                    console.log(error)
                     return connection.rollback(function () {
                         return callback(null, error);
                     });
                 }
                 connection.commit(function (err) {
                     if (err) {
+                        console.log(error)
                         return connection.rollback(function () {
                             throw err;
                         });
                     }
-                    return callback(results);
+                    historyMethods.addHistoryNote('issue', results.insertId, {
+                        operationType: 'add',
+                        date: Date.now(),
+                        userName: userName
+                    }, () => {
+                        callback(results)
+                    });
                 });
             });
         });
     };
-    const updateIssue = (callback, id, issue) => {
+    const updateIssue = (callback, id, issue, diff, userName) => {
         let statementsString = '';
         let needToUpdateCompleteness = null;
         let needToUpdateSP = 0;
@@ -97,7 +107,14 @@ module.exports = (connection) => {
                                     throw err;
                                 });
                             }
-                            return callback(results);
+                            historyMethods.addHistoryNote('issue', results.insertId, {
+                                operationType: 'add',
+                                date: Date.now(),
+                                diff: diff,
+                                userName: userName
+                            }, () => {
+                                callback(results)
+                            });
                         });
                     });
                 } else {
@@ -107,7 +124,14 @@ module.exports = (connection) => {
                                 throw err;
                             });
                         }
-                        return callback(results);
+                        historyMethods.addHistoryNote('issue', results.insertId, {
+                            operationType: 'add',
+                            date: Date.now(),
+                            diff: diff,
+                            userName: userName
+                        }, () => {
+                            callback(results)
+                        });
                     });
                 }
             });

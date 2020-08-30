@@ -16,7 +16,7 @@ module.exports = (connection) => {
             } else {
                 res.send({ status: 400 });
             }
-        }, req.body.increment);
+        }, req.body.increment, req.body.userName);
     });
     router.put('/:incrementId', function (req, res) {
         methods.updateIncrement(function (results, error) {
@@ -25,7 +25,7 @@ module.exports = (connection) => {
             } else {
                 res.send({ status: 401 });
             }
-        }, req.params.incrementId, req.body.increment);
+        }, req.params.incrementId, req.body.increment, req.body.diff, req.body.userName);
     });
     router.get('/', function (req, res) {
         const params = req.query;

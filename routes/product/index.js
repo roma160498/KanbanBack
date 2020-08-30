@@ -16,7 +16,7 @@ module.exports = (connection) => {
             } else {
                 res.send({ status: 400 });
             }
-        }, req.body.product);
+        }, req.body.product, req.body.userName);
     });
     router.put('/:productId', function (req, res) {
         methods.updateProduct(function (results, error) {
@@ -25,7 +25,7 @@ module.exports = (connection) => {
             } else {
                 res.send({ status: 401 });
             }
-        }, req.params.productId, req.body.product);
+        }, req.params.productId, req.body.product, req.body.diff, req.body.userName);
     });
     router.get('/', function (req, res) {
         const params = req.query;

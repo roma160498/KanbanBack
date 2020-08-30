@@ -1,3 +1,5 @@
+const file = require('../../../routes/file');
+
 module.exports = (connection) => {
     const serverDirectory = `.\\\\uploads\\\\`;
     const fs = require('fs');
@@ -9,8 +11,10 @@ module.exports = (connection) => {
             path: serverDirectory + fileObject.name,
             description: fileObject.description || ''
         };
+        console.log(file)
         connection.query(`INSERT INTO file (path, size, type, description) Values 
         ("${file.path}", "${file.size}", "${file.type}", "${file.description}")`, function (error, results, fields) {
+            console.log(error)
             if (error) {
                 return callback(null, error);
             }
@@ -18,15 +22,71 @@ module.exports = (connection) => {
         });
     };
 
-    const saveFileToFS = (file) => {
-        
-        fs.copyFile(file.path, serverDirectory + file.name, function(err) {  
-            return err ? false : true;
+    const saveFileToFS = (file, callback) => {
+        fs.copyFileSync(file.path, serverDirectory + file.name);
+        callback();
+    };
+
+    const getImagePathFromDB = (callback, id) => {
+        connection.query(`SELECT path from file where id=${id}`, function (error, results, fields) {
+            if (error) {
+                console.log(error);
+                return error;
+            }
+            return callback(results);
         });
     };
 
+    const getFile = (callback, id) => {
+        connection.query(`SELECT path from file where id=${id}`, function (error, results, fields) {
+            if (error) {
+                console.log(error);
+                return error;
+            }
+            return callback(results);
+        });
+    };
+
+    const getUserAvatar = (callback, userId) => {
+        connection.query(`SELECT f.path from file as f left join user as u 
+        on f.id = u.image_id where u.id=${userId}`, function (error, results, fields) {
+            console.log(error)
+            if (error) {
+                console.log(error);
+                return error;
+            }
+            return callback(results);
+        });
+    }
+
+    const getAllFiles = (callback, userId) => {
+        connection.query(`SELECT * from file`, function (error, results, fields) {
+            console.log(error)
+            if (error) {
+                console.log(error);
+                return error;
+            }
+            return callback(results);
+        });
+    }
+
+    const deleteFile = (callback, id) => {
+        connection.query(`DELETE from file where id="${id}"`, function (error, results, fields) {
+            console.log(error, 'lol')
+            if (error) {
+                console.log(error);
+                return error;
+            }
+            return callback(results);
+        });
+    }
     return {
         saveFileToDB,
-        saveFileToFS
+        saveFileToFS,
+        getImagePathFromDB,
+        getUserAvatar,
+        getAllFiles,
+        deleteFile,
+        getFile
     };
 }

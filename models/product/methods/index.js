@@ -1,4 +1,6 @@
 module.exports = (connection) => {
+    const historyMethods = require('../../history/methods')(connection);
+
     const getProducts = (callback, properties, amount, offset, isCount) => {
         let propString = properties ? properties.join(',') : '*';
         propString = isCount ? `COUNT(${propString}) as sum` : propString;
@@ -19,25 +21,40 @@ module.exports = (connection) => {
             return callback(results);
         });
     };
-    const insertProduct = (callback, product) => {
+    const insertProduct = (callback, product, userName) => {
         connection.query(`INSERT INTO product (name, description) Values ("${product['name']}", "${product['description']}")`, function (error, results, fields) {
+            console.log(error)
             if (error) {
                 return callback(null, error);
             }
-            return callback(results);
+            historyMethods.addHistoryNote('product', results.insertId, {
+                operationType: 'add',
+                date: Date.now(),
+                userName: userName
+            }, () => {
+                callback(results)
+            });
         });
     };
-    const updateProduct = (callback, id, product) => {
+    const updateProduct = (callback, id, product, diff, userName) => {
         let statementsString = '';
         for (let key of Object.keys(product)) {
             statementsString += `${key}='${product[key]}',`
         }
         statementsString = statementsString.slice(0, -1)
         connection.query(`UPDATE product SET ${statementsString} where id='${id}'`, function (error, results, fields) {
+            console.log(error)
             if (error) {
                 return callback(null, error);
             }
-            return callback(results);
+            historyMethods.addHistoryNote('product', id, {
+                operationType: 'update',
+                date: Date.now(),
+                diff: diff,
+                userName: userName
+            }, () => {
+                callback(results)
+            });
         });
     };
 

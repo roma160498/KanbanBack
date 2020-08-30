@@ -1,4 +1,6 @@
 module.exports = (connection) => {
+    const historyMethods = require('../../history/methods')(connection);
+
     const getIncrements = (callback, properties, amount, offset, isCount) => {
         let propString =  `i.id, i.name, i.product_id, i.start_date, i.end_date, i.status_id,
         i.business_objectives, p.name as product_name, st.name as status_name`;
@@ -33,12 +35,18 @@ module.exports = (connection) => {
             return callback(results);
         });
     };
-    const insertIncrement = (callback, increment) => {
+    const insertIncrement = (callback, increment, userName) => {
         connection.query(`INSERT INTO increment (name, product_id, start_date, end_date, status_id, business_objectives) Values ("${increment['name']}", "${increment['product_id']}", "${increment['start_date'].toString().slice(0, 10)}", "${increment['end_date'].toString().slice(0, 10)}", "${increment['status_id']}", "${increment['objectives']}")`, function (error, results, fields) {
             if (error) {
                 return callback(null, error);
             }
-            return callback(results);
+            historyMethods.addHistoryNote('increment', results.insertId, {
+                operationType: 'add',
+                date: Date.now(),
+                userName: userName
+            }, () => {
+                callback(results)
+            });
         });
     };
     const deleteIncrement = (callback, id) => {
@@ -49,7 +57,7 @@ module.exports = (connection) => {
             return callback(results);
         });
     };
-    const updateIncrement = (callback, id, increment) => {
+    const updateIncrement = (callback, id, increment, diff, userName) => {
         let statementsString = '';
         for (let key of Object.keys(increment)) {
             statementsString += `${key}='${increment[key]}',`;
@@ -59,7 +67,14 @@ module.exports = (connection) => {
             if (error) {
                 return callback(null, error);
             }
-            return callback(results);
+            historyMethods.addHistoryNote('increment', id, {
+                operationType: 'update',
+                date: Date.now(),
+                diff: diff,
+                userName: userName
+            }, () => {
+                callback(results)
+            });
         });
     };
 

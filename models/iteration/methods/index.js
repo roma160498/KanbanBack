@@ -1,4 +1,6 @@
 module.exports = (connection) => {
+    const historyMethods = require('../../history/methods')(connection);
+
     const getIterations = (callback, properties, amount, offset, isCount) => {
         let propString =  `i.id, i.name, i.increment_id, i.start_date, i.end_date, i.status_id,
         i.completeness, i.story_points, inc.name as increment_name, st.name as status_name`;
@@ -25,15 +27,21 @@ module.exports = (connection) => {
             return callback(results);
         });
     };
-    const insertIteration = (callback, iteration) => {
+    const insertIteration = (callback, iteration, userName) => {
         connection.query(`INSERT INTO iteration (name, increment_id, start_date, end_date, status_id, story_points, completeness) Values ("${iteration['name']}", "${iteration['increment_id']}", "${iteration['start_date']}", "${iteration['end_date']}", "${iteration['status_id']}", "${iteration['story_points']}", "${iteration['completeness']}")`, function (error, results, fields) {
             if (error) {
                 return callback(null, error);
             }
-            return callback(results);
+            historyMethods.addHistoryNote('iteration', results.insertId, {
+                operationType: 'add',
+                date: Date.now(),
+                userName: userName
+            }, () => {
+                callback(results)
+            });
         });
     };
-    const updateIteration = (callback, id, iteration) => {
+    const updateIteration = (callback, id, iteration, diff, userName) => {
         let statementsString = '';
         for (let key of Object.keys(iteration)) {
             statementsString += `${key}='${iteration[key]}',`;
@@ -43,7 +51,14 @@ module.exports = (connection) => {
             if (error) {
                 return callback(null, error);
             }
-            return callback(results);
+            historyMethods.addHistoryNote('iteration', id, {
+                operationType: 'update',
+                date: Date.now(),
+                diff: diff,
+                userName: userName
+            }, () => {
+                callback(results)
+            });
         });
     };
 

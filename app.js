@@ -28,6 +28,7 @@ const router = require('./routes')(connection, sqlOptions);
 const userMethods = require('./models/user/methods')(connection);
 const authenticationMiddleware = () => {
     return function (req, res, next) {
+        console.log(req.isAuthenticated(), req.user);
         if (req.isAuthenticated()) {
             return next()
         }
@@ -78,9 +79,11 @@ passport.use(new LocalStrategy({
 }));
 
 passport.serializeUser(function (user, done) {
+    console.log('ser');
     done(null, JSON.stringify(user));
 });
 passport.deserializeUser(function (user, done) {
+    console.log('des');
     try {
         done(null, JSON.parse(user));
     } catch (error) {
@@ -100,7 +103,7 @@ app.post('/login', function (req, res, next) {
             if (code === 406) {
                 res.send({ status: 406, user: user });
             } else {
-                req.login(user, function (err) { })
+                req.logIn(user, function (err) { })
                 res.send({ status: 200, user: user });
             }
         } else {

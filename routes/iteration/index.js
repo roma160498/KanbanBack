@@ -16,7 +16,7 @@ module.exports = (connection) => {
             } else {
                 res.send({ status: 400 });
             }
-        }, req.body.iteration);
+        }, req.body.iteration, req.body.userName);
     });
     router.put('/:iterationId', function (req, res) {
         methods.updateIteration(function (results, error) {
@@ -25,7 +25,7 @@ module.exports = (connection) => {
             } else {
                 res.send({ status: 401 });
             }
-        }, req.params.iterationId, req.body.iteration);
+        }, req.params.iterationId, req.body.iteration, req.body.diff, req.body.userName);
     });
     router.get('/', function (req, res) {
         const params = req.query;

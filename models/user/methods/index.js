@@ -1,6 +1,6 @@
 module.exports = (connection) => {
+    const historyMethods = require('../../history/methods')(connection);
     const getUsers = (callback, properties, amount, offset, isCount) => {
-       console.log('11111')
         let propString = properties ? properties.join(',') : '*';
         propString = isCount ? `COUNT(${propString}) as sum` : propString;
         const amountParam = amount !== 'undefined' ? 'limit ' + amount : '';
@@ -12,12 +12,19 @@ module.exports = (connection) => {
             return callback(results);
         });
     };
-    const insertUser = (callback, user) => {
+
+    const insertUser = (callback, user, userName) => {
         connection.query(`INSERT INTO user (login, password, name, surname, email, is_admin, is_initialPassword) Values ("${user['login']}", "${user['password']}", "${user['name']}", "${user['surname']}", "${user['email']}", ${user['is_admin']}, ${user['is_initialPassword']})`, function (error, results, fields) {
             if (error) {
                 return callback(null, error);
             }
-            return callback(results);
+            historyMethods.addHistoryNote('user', results.insertId, {
+                operationType: 'add',
+                date: Date.now(),
+                userName: userName
+            }, () => {
+                callback(results)
+            });
         });
     };
     const deleteUser = (callback, id) => {
@@ -28,7 +35,7 @@ module.exports = (connection) => {
             return callback(results);
         });
     };
-    const updateUser = (callback, id, user) => {
+    const updateUser = (callback, id, user, diff, userName) => {
         let statementsString = '';
         for (let key of Object.keys(user)) {
             statementsString += `${key}='${user[key]}',`;
@@ -38,7 +45,14 @@ module.exports = (connection) => {
             if (error) {
                 return callback(null, error);
             }
-            return callback(results);
+            historyMethods.addHistoryNote('user', id, {
+                operationType: 'update',
+                date: Date.now(),
+                diff: diff,
+                userName: userName
+            }, () => {
+                callback(results)
+            });
         });
     };
     const findUserByName = (username, callback) => {
